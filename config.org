@@ -1,9 +1,3 @@
-* Auctex
-#+begin_src emacs-lisp
-  (use-package auctex
-    :defer t
-    :ensure t)
-#+end_src
 * Basic Interface Settings
 ** Looks
 *** Startup mesasge
@@ -62,10 +56,24 @@
     :init (dired-async-mode 1)
     (async-bytecomp-package-mode 1))
 #+end_src
+* Editing with sudo
+#+begin_src emacs-lisp
+  (use-package sudo-edit
+    :ensure t
+    :bind
+    ("s-e" . sudo-edit))
+#+end_src
 * Git integration
 ** Magit
 #+begin_src emacs-lisp
   (use-package magit
+    :ensure t)
+#+end_src
+* Latex
+** Auctex
+#+begin_src emacs-lisp
+  (use-package auctex
+    :defer t
     :ensure t)
 #+end_src
 * Markdown-mode
@@ -357,6 +365,84 @@
     :ensure t
     :custom
     (bibtex-completion-bibliography '("mnt/idea-machine/slip-box/refs/references.bib")))
+** Org-capture
+#+begin_src emacs-lisp
+  (require 'org)
+
+  ;; Files
+  (setq org-directory "~/Documents/org")
+  (setq org-agenda-files '("~/Documents/org"))
+
+  ;; Capture
+  (setq org-capture-templates
+        `(("i" "Inbox" entry  (file "inbox.org")
+          ,(concat "* TODO %?\n"
+                   "/Entered on/ %U"))
+          ("m" "Meeting" entry  (file+headline "agenda.org" "Future")
+          ,(concat "* %? :meeting:\n"
+                   "<%<%Y-%m-%d %a %H:00>>"))
+          ("n" "Note" entry  (file "notes.org")
+          ,(concat "* Note (%a)\n"
+                   "/Entered on/ %U\n" "\n" "%?"))))
+
+  (defun org-capture-inbox ()
+       (interactive)
+       (call-interactively 'org-store-link)
+       (org-capture nil "i"))
+
+  (defun org-capture-mail ()
+    (interactive)
+    (call-interactively 'org-store-link)
+    (org-capture nil "@"))
+
+  ;; Use full window for org-capture
+  (add-hook 'org-capture-mode-hook 'delete-other-windows)
+
+  ;; Key bindings
+  (define-key global-map            (kbd "C-c a") 'org-agenda)
+  (define-key global-map            (kbd "C-c c") 'org-capture)
+  (define-key global-map            (kbd "C-c i") 'org-capture-inbox)
+
+  ;; Refile
+  (setq org-refile-use-outline-path 'file)
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-targets
+        '(("projects.org" :regexp . "\\(?:\\(?:Note\\|Task\\)s\\)")))
+
+  ;; TODO
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "|" "DONE(d)")))
+  (defun log-todo-next-creation-date (&rest ignore)
+    "Log NEXT creation time in the property drawer under the key 'ACTIVATED'"
+    (when (and (string= (org-get-todo-state) "NEXT")
+               (not (org-entry-get nil "ACTIVATED")))
+      (org-entry-put nil "ACTIVATED" (format-time-string "[%Y-%m-%d]"))))
+  (add-hook 'org-after-todo-state-change-hook #'log-todo-next-creation-date)
+
+  ;; Agenda
+  (setq org-agenda-custom-commands
+        '(("g" "Get Things Done (GTD)"
+           ((agenda ""
+                    ((org-agenda-skip-function
+                      '(org-agenda-skip-entry-if 'deadline))
+                     (org-deadline-warning-days 0)))
+            (todo "NEXT"
+                  ((org-agenda-skip-function
+                    '(org-agenda-skip-entry-if 'deadline))
+                   (org-agenda-prefix-format "  %i %-12:c [%e] ")
+                   (org-agenda-overriding-header "\nTasks\n")))
+            (agenda nil
+                    ((org-agenda-entry-types '(:deadline))
+                     (org-agenda-format-date "")
+                     (org-deadline-warning-days 7)
+                     (org-agenda-skip-function
+                      '(org-agenda-skip-entry-if 'notregexp "\\* NEXT"))
+                     (org-agenda-overriding-header "\nDeadlines")))
+            (tags-todo "inbox"
+                       ((org-agenda-prefix-format "  %?-12t% s")
+                        (org-agenda-overriding-header "\nInbox\n")))
+            (tags "CLOSED>=\"<today>\""
+                  ((org-agenda-overriding-header "\nCompleted today\n")))))))
 #+end_src
 * Programming
 ** Spaces instead of tabs
@@ -420,13 +506,6 @@
   (use-package yaml-mode
     :ensure t)
 #+end_src
-* Editing with sudo
-#+begin_src emacs-lisp
-  (use-package sudo-edit
-    :ensure t
-    :bind
-    ("s-e" . sudo-edit))
-#+end_src
 * Ripgrep
 #+begin_src emacs-lisp
   (use-package rg
@@ -446,8 +525,8 @@
             (lambda ()
               (variable-pitch-mode 1)))
 
-  (set-face-attribute 'default nil :family "Fira Code" :height 120)
-  (set-face-attribute 'fixed-pitch nil :family "Fira Code")
+  (set-face-attribute 'default nil :family "Cascadia Code" :height 120)
+  (set-face-attribute 'fixed-pitch nil :family "Cascadia Code")
   (set-face-attribute 'variable-pitch nil :family "Roboto Mono")
 #+end_src
 ** Theme
