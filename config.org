@@ -506,6 +506,19 @@
   (use-package yaml-mode
     :ensure t)
 #+end_src
+*** javascript
+#+begin_src emacs-lisp
+  (use-package js2-mode
+    :ensure t
+    :config
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+    (add-hook 'js2-mode-hook #'js2-imenu-extras-mode))
+#+end_src
+*** typescript
+#+begin_src emacs-lisp
+  (use-package typescript-mode
+    :ensure t)
+#+end_src
 * Ripgrep
 #+begin_src emacs-lisp
   (use-package rg
