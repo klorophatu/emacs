@@ -1,3 +1,27 @@
+* Text
+** Markdown-mode
+#+begin_src emacs-lisp
+  (use-package markdown-mode
+    :ensure t
+    :commands (markdown-mode gfm-mode)
+    :mode (("README\\.md\\'" . gfm-mode)
+           ("\\.md\\'" . markdown-mode)
+           ("\\.markdown\\'" . markdown-mode))
+    :init (setq markdown-command "multimarkdown")
+    :hook
+    ((markdown-mode . flyspell-mode)
+     (org-mode . flyspell-mode)))
+#+end_src
+** Spell check
+#+begin_src emacs-lisp
+  (setq ispell-program-name (executable-find "hunspell")
+        ispell-dictionary "en_US")
+#+end_src
+** Writeroom
+#+begin_src emacs-lisp
+  (use-package writeroom-mode
+    :ensure t)
+#+end_src
 * Basic Interface Settings
 ** Looks
 *** Startup mesasge
@@ -75,19 +99,6 @@
   (use-package auctex
     :defer t
     :ensure t)
-#+end_src
-* Markdown-mode
-#+begin_src emacs-lisp
-  (use-package markdown-mode
-    :ensure t
-    :commands (markdown-mode gfm-mode)
-    :mode (("README\\.md\\'" . gfm-mode)
-           ("\\.md\\'" . markdown-mode)
-           ("\\.markdown\\'" . markdown-mode))
-    :init (setq markdown-command "multimarkdown")
-    :hook
-    ((markdown-mode . flyspell-mode)
-     (org-mode . flyspell-mode)))
 #+end_src
 * Minor conveniences
 ** Open configuration
